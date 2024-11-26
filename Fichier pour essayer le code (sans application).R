@@ -2,6 +2,9 @@
 #GRAPHIQUE
 
 library(lubridate)
+library(dplyr)
+library(ggplot2)
+library(plotly)
 
 #Creation de nos données
 data_octobre <- read.csv2("data/bilan-electrique-jour-octobre.csv")
@@ -25,21 +28,12 @@ nouvelle_data <- data %>% filter(data$jour > depart)
 
 nouvelle_data$somme_cumulee <- cumsum(nouvelle_data$consommation_totale)
 
-ggplot(data = data) + 
+ggplotly(ggplot(data = data) + 
   aes(x = jour, y = consommation_totale) +
-  geom_point()
+  geom_point())
 
-
-ymd(data$jour)
 
 data <- read.csv2("Projet/bilan-electrique-jour.csv")
-
-test_data <- data
-test_data$lll <- as.double(data$production_totale) - as.double(data$consommation_totale)
-
-as.integer(data$production_totale[1])
-
-test_data %>%  convert(int(production_totale))
 
 as.double(data$production_totale)
 
