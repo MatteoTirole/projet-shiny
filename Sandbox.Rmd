@@ -1,0 +1,81 @@
+---
+title: "Sandbox"
+author: "Adrien CHATEL"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+C'est le fichier dans lequel je vais résumer ce qu'il y a à faire
+Discuter des méthodes utilisées et faire divers tests
+Tout en vous laissant l'accès si vous voulez y jeter un oeil
+
+
+### Objectif
+
+Estimer l'impact de la sobriété énergétique sur les consommations électriques en France.
+Modèle suivant les segments de clientèles sur les consommations quotidiennes puis les comparer avec ce qui aurait dû se passer dans un monde sans crise sanitaire.
+
+### Informations importantes
+
+Observatoire de la consommation : https://observatoire.enedis.fr
+Open data ENEDIS : https://data.enedis.fr/pages/opendatagrd/
+
+### Travail à effectuer
+
+**Inputs du shiny :**
+1. Un segment des consommations : 
+   - Entreprises
+   - PME/PMI
+   - Professionnels
+   - Résidentiels
+   - Total
+2. Une période (qui commence forcément après le 1/10/22).
+
+**Outputs du shiny :**
+1. Un graph interactif présentant la courbe réalisée et la courbe modélisée sur la période considérée :
+   - Ajouter des traits en pointillés pour les bornes de l'intervalle de confiance.
+2. Trois valuebox (en GWh et en %age) avec :
+   - La somme des consommations prédites par le modèle.
+   - La somme des consommations réalisées.
+   - L'impact de la sobriété énergétique (différence des deux).
+3. Un datatable contenant :
+   - La série modélisée.
+   - La série réelle.
+   - L'écart jour par jour sur la période.
+4. Un bouton download pour télécharger ces données.
+
+### Importation des packages
+
+On va avoir besoin du package `shiny` pour l'application, de `lubridate` pour exploiter les dates, de `tidyverse` pour la partie data engineering,  de `plotly` pour nos graphiques, de `forecast` pour le modèle prédictif et de `DT` pour la création des tables.
+
+```{r packages, warning=False}
+library(shiny)
+library(tidyverse)
+library(lubridate)
+library(plotly)
+library(forecast)
+library(DT)
+```
+
+
+### Téléchargement et filtrage des données
+
+Sur la page d'opendata d'Enedis, on peut télécharger deux jeux de données :
+  - Agrégats segmentés de conso électriques dont la puissance > 35kVA
+  - grégats segmentés de conso électriques dont la puissance <= 35kVA
+  
+Dans la colonne `Profil` on a accès au type de clientèle, sauf pour les PME/PMI qu'il faudra déterminer par une condition sur les plages de puissance souscrite. En effet, les PME/PMI sont les entreprises dont les puissances souscrites sont comprises entre 36 et 1250 kW.
+
+```{r importation}
+data_inf36 <- read.csv2()
+data_sup36 <- read.csv2()
+
+data <- 
+```
+
