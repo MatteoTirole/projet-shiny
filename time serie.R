@@ -13,8 +13,14 @@ ggplot(data = data)+
 library(forecast)
 library(astsa)
 library(tseries)
+library(dplyr)
 
 
+data_simplifie <- data %>% select(Jour,Puissance.moyenne.journalière.de.la.consommation.totale..W.)
+write.csv(data_simplifie,file="Data.csv")
+
+
+  
 datast <- ts(data = data$Puissance.moyenne.journalière.de.la.consommation.totale..W.,
              start = c(2019,11,23),
              frequency = 365)
@@ -58,3 +64,54 @@ plot(forecast_tbats)
 
 
 ## Ok ici on va essayer de moyeniser chaque mois pour n'avoir qu'un seul 
+
+data_mois
+
+# Transformer la date en format Année-Mois et faire la moyenne
+df_mois <- data_simplifie %>%
+  mutate(Mois = format(Jour, "%Y-%m")) %>%  # Extraire Année-Mois
+  group_by(Mois) %>%
+  summarise(Moyenne_Valeur = mean(Puissance.moyenne.journalière.de.la.consommation.totale..W., na.rm = TRUE))
+
+# Afficher le résultat
+print(df_mois)
+
+datast <- ts(data = df_mois$Moyenne_Valeur, start = c(2019,11), frequency = 12)
+
+plot(datast)
+
+
+adf.test(datast)
+# La série est donc stationnaire
+
+datast %>%
+  acf2()
+
+model <- auto.arima(datast, max.order = 10)
+summary(model)
+
+sarima.for(datast, n.ahead = 12, 0,1,1,1,1,1,12)
+
+input <- c(debut, fin)
+
+Variables <- c(data$proffess)
+
+data$Puissance.moyenne.journalière.de.la.consommation.profilée.BT.INF.36.Professionnelle..W. <- as.numeric(data$Puissance.moyenne.journalière.de.la.consommation.profilée.BT.INF.36.Professionnelle..W.)
+
+data_clean <- data %>%
+  select(c("Puissance moyenne journalière de la consommation totale HTA (W)","Puissance moyenne journalière de la consommation télérelevée BT SUP 36 (W)","Puissance moyenne journalière de la consommation télérelevée BT INF 36 Professionelle (W)","Puissance moyenne journalière de la consommation télérelevée BT INF 36 Résidentielle (W)","Puissance moyenne journalière de la consommation totale.W"))
+
+
+data_clean <- data %>%
+  select(
+    Jour,
+    Puissance.moyenne.journalière.de.la.consommation.totale.HTA..W.,
+    Puissance.moyenne.journalière.de.la.consommation.télérelevée.BT.SUP.36..W.,
+    Puissance.moyenne.journalière.de.la.consommation.télérelevée.BT.INF.36.Professionelle..W.,
+    Puissance.moyenne.journalière.de.la.consommation.télérelevée.BT.INF.36.Résidentielle..W.,
+    Puissance.moyenne.journalière.de.la.consommation.totale..W.
+  )
+
+colnames(data_clean) <- c("Jour","Entreprises ","PME/PMI","Professionnels","Résidentiels","Total")
+
+write.csv(data_clean, "data.csv")
