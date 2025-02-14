@@ -18,10 +18,6 @@ library(dplyr)
 ### Ici, on nettoie la table de données pour prendre uniquement les variables qui nous intéresse
 
 data_clean <- data %>%
-  select(c("Puissance moyenne journalière de la consommation totale HTA (W)","Puissance moyenne journalière de la consommation télérelevée BT SUP 36 (W)","Puissance moyenne journalière de la consommation télérelevée BT INF 36 Professionelle (W)","Puissance moyenne journalière de la consommation télérelevée BT INF 36 Résidentielle (W)","Puissance moyenne journalière de la consommation totale.W"))
-
-
-data_clean <- data %>%
   select(
     Jour,
     Puissance.moyenne.journalière.de.la.consommation.totale.HTA..W.,
@@ -31,7 +27,7 @@ data_clean <- data %>%
     Puissance.moyenne.journalière.de.la.consommation.totale..W.
   )
 
-colnames(data_clean) <- c("Jour","Entreprises","PME/PMI","Professionnels","Résidentiels","Total")
+colnames(data_clean) <- c("Jour","Entreprises","PME_PMI","Professionnels","Résidentiels","Total")
 
 write.csv(data_clean, "data.csv", row.names = FALSE)
 write.csv(data_clean, "Application/data.csv", row.names = FALSE)

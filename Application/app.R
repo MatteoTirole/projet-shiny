@@ -25,7 +25,7 @@ ui <- navbarPage("Shiny App",
                           sidebarLayout(
                             sidebarPanel(
                               selectInput("var", "Choisir une catégorie :", 
-                                          choices = c("Entreprises", "PME.PMI", "Professionnels", "Résidentiels", "Total")),
+                                          choices = c("Entreprises", "PME_PMI", "Professionnels", "Résidentiels", "Total")),
                               dateRangeInput("dateRange", "Période :", 
                                              start = as.Date("2022-10-01"), end = max(df$Jour),
                                              min = as.Date("2022-10-01"), max = max(df$Jour))
@@ -38,9 +38,9 @@ ui <- navbarPage("Shiny App",
                  # ValueBox
                  tabPanel("Valeurs",
                           fluidRow(
-                            column(4, verbatimTextOutput("total_entreprises")),
-                            column(4, verbatimTextOutput("total_pme")),
-                            column(4, verbatimTextOutput("total_total"))
+                            column(4, verbatimTextOutput("total_reel")),
+                            column(4, verbatimTextOutput("total_estimation")),
+                            column(4, verbatimTextOutput("total_ecart"))
                           ),
                  fluidRow(
                    column(12, textOutput("explication_valeurs"))
@@ -66,23 +66,18 @@ server <- function(input, output) {
   # Graphique
   output$graph <- renderPlot({
     fct(input$dateRange[1],input$dateRange[2], input$var)
-    # ggplot(data_filtered(), aes(x = Jour, y = .data[[input$var]])) +
-    #   geom_point(color = "blue") +
-    #   labs(title = paste("Évolution de", input$var),
-    #        x = "Date", y = input$var) +
-    #   theme_minimal()
   })
   
   # Valeurs totales
-  output$total_entreprises <- renderText({
+  output$total_reel <- renderText({
     paste("Somme total de l'année 2024 :", somme_tot())
   })
   
-  output$total_pme <- renderText({
+  output$total_estimation <- renderText({
     paste("Sommme prédite de l'année 2024 :", somme_predit())
   })
   
-  output$total_total <- renderText({
+  output$total_ecart <- renderText({
     paste("Impact de la sobriété énerétique", abs(somme_tot() - somme_predit()))
   })
   
@@ -92,7 +87,6 @@ server <- function(input, output) {
   
   # Table des données
   output$table <- renderDT({
-    #datatable(data_filtered())
     datatable(creation_data(input$dateRange[1],input$dateRange[2], input$var))
   })
   
