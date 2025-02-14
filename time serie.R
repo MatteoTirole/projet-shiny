@@ -112,6 +112,13 @@ data_clean <- data %>%
     Puissance.moyenne.journalière.de.la.consommation.totale..W.
   )
 
-colnames(data_clean) <- c("Jour","Entreprises ","PME/PMI","Professionnels","Résidentiels","Total")
+colnames(data_clean) <- c("Jour","Entreprises","PME/PMI","Professionnels","Résidentiels","Total")
 
-write.csv(data_clean, "data.csv")
+write.csv(data_clean, "data.csv", row.names = FALSE)
+write.csv(data_clean, "Application/data.csv", row.names = FALSE)
+
+ggplot(data = data_clean)+
+  aes(x = Jour, y = Total) +
+  geom_point()+
+  geom_smooth(method = "loess", color = "red", fill = "grey", linetype = "dashed", span=0.1)+
+  theme_minimal()

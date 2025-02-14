@@ -4,17 +4,17 @@ library(DT)
 
 # Charger les données
 df <- read.csv("Data.csv")
-df$Jour <- as.Date(df$Jour)  # Convertir en date
+df$Jour <- as.Date(df$Jour)  
 
 # UI
 ui <- navbarPage("Shiny App",
                  
-                 # Onglet Graphique
+                 #Graphique
                  tabPanel("Graphiques",
                           sidebarLayout(
                             sidebarPanel(
                               selectInput("var", "Choisir une catégorie :", 
-                                          choices = c("Entreprises", "PME/PMI", "Professionnels", "Résidentiels", "Total")),
+                                          choices = c("Entreprises", "PME.PMI", "Professionnels", "Résidentiels", "Total")),
                               dateRangeInput("dateRange", "Période :", 
                                              start = min(df$Jour), end = max(df$Jour))
                             ),
@@ -23,7 +23,7 @@ ui <- navbarPage("Shiny App",
                             )
                           )),
                  
-                 # Onglet ValueBox
+                 # ValueBox
                  tabPanel("Valeurs",
                           fluidRow(
                             column(4, verbatimTextOutput("total_entreprises")),
@@ -31,7 +31,7 @@ ui <- navbarPage("Shiny App",
                             column(4, verbatimTextOutput("total_total"))
                           )),
                  
-                 # Onglet Table
+                 #Table
                  tabPanel("Table des Données",
                           DTOutput("table")),
                  
@@ -40,7 +40,6 @@ ui <- navbarPage("Shiny App",
                           downloadButton("downloadData", "Télécharger CSV"))
 )
 
-# SERVER
 server <- function(input, output) {
   
   # Filtrer les données
@@ -63,7 +62,7 @@ server <- function(input, output) {
   })
   
   output$total_pme <- renderText({
-    paste("Total PME/PMI :", sum(df$`PME/PMI`, na.rm = TRUE))
+    paste("Total PME/PMI :", sum(df$PME.PMI, na.rm = TRUE))
   })
   
   output$total_total <- renderText({
@@ -84,5 +83,4 @@ server <- function(input, output) {
   )
 }
 
-# Lancer l'application
 shinyApp(ui, server)

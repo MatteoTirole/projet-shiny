@@ -53,3 +53,9 @@ class(data$production_totale)
 ggplot(data = data) + 
   aes(x = as.Date(jour), y = production_totale) + 
   geom_line()
+
+
+test <- read.csv2("data/conso_clean.csv")
+summary(test)
+plot(as.Date(test$Horodate),test$X)
+plot(test$X)

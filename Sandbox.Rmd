@@ -76,7 +76,7 @@ J'ai procédé à la partie "data engineering" sur un script à part puisqu'elle
 
 ```{r importation}
 data_path = "C:/Users/theri/Documents/M2 Modé/projet-shiny/data/conso_clean.csv"
-data <- read.csv2(data_path)
+data <- read.csv2("data/conso_clean.csv")
 head(data)
 ```
 ### Modèle SARIMA
