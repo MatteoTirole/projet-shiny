@@ -1,13 +1,19 @@
 library(shiny)
 library(ggplot2)
 library(DT)
+library(zoo)
+library(dplyr)
+library(forecast)
+library(astsa)
+library(tseries)
 
-source('Application/fonction.R')
+
+source("fonction.R")
 
 # Charger les données
 df <- read.csv("Data.csv")
 df$Jour <- as.Date(df$Jour)  
-
+data_clean <- read.csv("Data.csv")
 library(zoo)
 
 
@@ -21,7 +27,8 @@ ui <- navbarPage("Shiny App",
                               selectInput("var", "Choisir une catégorie :", 
                                           choices = c("Entreprises", "PME.PMI", "Professionnels", "Résidentiels", "Total")),
                               dateRangeInput("dateRange", "Période :", 
-                                             start = min(df$Jour), end = max(df$Jour))
+                                             start = as.Date("2022-10-01"), end = max(df$Jour),
+                                             min = as.Date("2022-10-01"), max = max(df$Jour))
                             ),
                             mainPanel(
                               plotOutput("graph")
@@ -34,7 +41,11 @@ ui <- navbarPage("Shiny App",
                             column(4, verbatimTextOutput("total_entreprises")),
                             column(4, verbatimTextOutput("total_pme")),
                             column(4, verbatimTextOutput("total_total"))
-                          )),
+                          ),
+                 fluidRow(
+                   column(12, textOutput("explication_valeurs"))
+                 )),
+                 
                  
                  #Table
                  tabPanel("Table des Données",
@@ -54,7 +65,7 @@ server <- function(input, output) {
   
   # Graphique
   output$graph <- renderPlot({
-    fct(input$dateRange[1],input$dateRange[2])
+    fct(input$dateRange[1],input$dateRange[2], input$var)
     # ggplot(data_filtered(), aes(x = Jour, y = .data[[input$var]])) +
     #   geom_point(color = "blue") +
     #   labs(title = paste("Évolution de", input$var),
@@ -64,27 +75,32 @@ server <- function(input, output) {
   
   # Valeurs totales
   output$total_entreprises <- renderText({
-    paste("Total Entreprises :", sum(df$Entreprises, na.rm = TRUE))
+    paste("Somme total de l'année 2024 :", somme_tot())
   })
   
   output$total_pme <- renderText({
-    paste("Total PME/PMI :", sum(df$PME.PMI, na.rm = TRUE))
+    paste("Sommme prédite de l'année 2024 :", somme_predit())
   })
   
   output$total_total <- renderText({
-    paste("Total Global :", sum(df$Total, na.rm = TRUE))
+    paste("Impact de la sobriété énerétique", abs(somme_tot() - somme_predit()))
+  })
+  
+  output$explication_valeurs <- renderText({
+    "Ces valeurs représentent la conssomation totale en France en GWh."
   })
   
   # Table des données
   output$table <- renderDT({
-    datatable(data_filtered())
+    #datatable(data_filtered())
+    datatable(creation_data(input$dateRange[1],input$dateRange[2], input$var))
   })
   
   # Téléchargement CSV
   output$downloadData <- downloadHandler(
     filename = function() { "données.csv" },
     content = function(file) {
-      write.csv(df(), file, row.names = FALSE)
+      write.csv(creation_data(input$dateRange[1],input$dateRange[2], input$var), file, row.names = FALSE)
     }
   )
 }
