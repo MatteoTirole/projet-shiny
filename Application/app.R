@@ -2,9 +2,14 @@ library(shiny)
 library(ggplot2)
 library(DT)
 
+source('Application/fonction.R')
+
 # Charger les données
 df <- read.csv("Data.csv")
 df$Jour <- as.Date(df$Jour)  
+
+library(zoo)
+
 
 # UI
 ui <- navbarPage("Shiny App",
@@ -49,11 +54,12 @@ server <- function(input, output) {
   
   # Graphique
   output$graph <- renderPlot({
-    ggplot(data_filtered(), aes(x = Jour, y = .data[[input$var]])) +
-      geom_point(color = "blue") +
-      labs(title = paste("Évolution de", input$var),
-           x = "Date", y = input$var) +
-      theme_minimal()
+    fct(input$dateRange[1],input$dateRange[2])
+    # ggplot(data_filtered(), aes(x = Jour, y = .data[[input$var]])) +
+    #   geom_point(color = "blue") +
+    #   labs(title = paste("Évolution de", input$var),
+    #        x = "Date", y = input$var) +
+    #   theme_minimal()
   })
   
   # Valeurs totales
@@ -76,9 +82,9 @@ server <- function(input, output) {
   
   # Téléchargement CSV
   output$downloadData <- downloadHandler(
-    filename = function() { "data_filtre.csv" },
+    filename = function() { "données.csv" },
     content = function(file) {
-      write.csv(data_filtered(), file, row.names = FALSE)
+      write.csv(df(), file, row.names = FALSE)
     }
   )
 }

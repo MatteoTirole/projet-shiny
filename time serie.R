@@ -122,3 +122,108 @@ ggplot(data = data_clean)+
   geom_point()+
   geom_smooth(method = "loess", color = "red", fill = "grey", linetype = "dashed", span=0.1)+
   theme_minimal()
+
+data_avant_covid <- data_clean %>%
+  filter(Jour < "2020-01-03")
+
+data_apres_covid <- data_clean %>%
+  filter(Jour > "2021-12-31")
+
+data_nocovid <- bind_rows(data_avant_covid, data_apres_covid)
+
+data_train_set <- data_nocovid %>%
+  filter(Jour < "2022-10-01")
+
+data_test_set <- data_nocovid %>%
+  filter(Jour > "2022-10-01")
+
+df_mois <- data_clean %>%
+  mutate(Mois = format(Jour, "%Y-%m")) %>%  # Extraire Année-Mois
+  group_by(Mois) %>%
+  summarise(Moyenne_Valeur = mean(Total, na.rm = TRUE))
+
+data_apres_covid <- data_apres_covid %>%
+  mutate(Mois = format(Jour, "%Y-%m")) %>%  # Extraire Année-Mois
+  group_by(Mois) %>%
+  summarise(Moyenne_Valeur = mean(Total, na.rm = TRUE))
+
+data_apres_covid_ts <- ts(data_apres_covid$Moyenne_Valeur,
+                        frequency = 12,
+                        start = c(2019,11))
+
+resultat <- sarima.for(data_apres_covid_ts, n.ahead = 12, 0,1,1,0,1,0,12)
+
+model <- auto.arima(data_apres_covid_ts)
+data_apres_covid_ts %>% plot()
+
+vrai_valeur <- data_clean %>%
+  filter(Jour>"2022-10-01")
+
+vrai_valeur <- vrai_valeur %>%
+  mutate(Mois = format(Jour, "%Y-%m")) %>%  # Extraire Année-Mois
+  group_by(Mois) %>%
+  summarise(Moyenne_Valeur = mean(Total, na.rm = TRUE))
+
+vrai_valeur_ts <- ts(vrai_valeur$Moyenne_Valeur, start = c(2022,10), frequency = 12)
+
+parametre <- model$arma
+
+plot.ts(data_apres_covid_ts, type = "o", col = "black", 
+        xlim=c(start(data_apres_covid_ts)[1],end(vrai_valeur_ts)[1]),
+        ylim = range(c(data_apres_covid_ts, resultat$pred, vrai_valeur_ts)))
+lines(resultat$pred, type = "o", col = "red")
+lines(vrai_valeur_ts, vrai_valeur_ts, type = "o", col = "blue")
+legend("topleft",
+       legend = c("Données avant COVID", "Prédiction", "Vraies données"),
+       col = c("black", "red", "blue"),
+       lty = 0.1, pch = 1)
+
+
+borne <- c(as.Date("2022-01-01"),as.Date("2023-10-05"))
+
+data_train <- data_clean %>% filter(Jour < borne[1] & Jour >= "2019-12-01")
+vrai_valeur <- data_clean %>% filter(Jour > borne[1] & Jour < borne[2])
+
+vrai_valeur <- vrai_valeur %>%
+  mutate(Mois = format(Jour, "%Y-%m")) %>%
+  group_by(Mois) %>%
+  summarise(Moyenne_Valeur = mean(Total, na.rm = TRUE))
+
+vrai_valeur_ts <- ts(vrai_valeur$Moyenne_Valeur,
+                     frequency = 12,
+                     start=c(format(borne[1], format = "%Y"),format(borne[1], format = "%m")))
+
+data_train <- data_train %>%
+  mutate(Mois = format(Jour, "%Y-%m")) %>%
+  group_by(Mois) %>%
+  summarise(Moyenne_Valeur = mean(Total, na.rm = TRUE))
+
+data_train_ts <- ts(data_train$Moyenne_Valeur, start = c(2019,12), frequency = 12)
+
+model <- auto.arima(data_train_ts)
+
+parametre <- model$arma
+
+resultat <- sarima.for(data_train_ts, n.ahead = 100, parametre[1],parametre[2],parametre[3],parametre[4],parametre[7],parametre[6],parametre[5])
+library(zoo)
+plot.ts(data_train_ts, type = "o", col = "black",
+        xlim=c(start(vrai_valeur_ts)[1],as.yearmon(end(vrai_valeur_ts)[1])),
+        ylim = range(c(data_train_ts, resultat$pred, vrai_valeur_ts)))
+lines(resultat$pred, type = "o", col = "red")
+lines(vrai_valeur_ts, vrai_valeur_ts, type = "o", col = "blue")
+legend("topleft",
+       legend = c("Données avant COVID", "Prédiction", "Vraies données"),
+       col = c("black", "red", "blue"),
+       lty = 0.1, pch = 1)
+
+
+
+
+
+
+
+
+
+
+
+
